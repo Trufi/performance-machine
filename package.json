@@ -2,7 +2,16 @@
   "name": "perf",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trufi/performance-machine.git"
+  },
+  "author": {
+    "name": "Mstislav Zhivodkov",
+    "email": "stevemyz@gmail.com",
+    "url": "https://trufi.github.io/"
+  },
+  "license": "MIT",
   "scripts": {
     "server": "ts-node -O '{\"module\": \"commonjs\"}' server",
     "build": "webpack --env.production",
