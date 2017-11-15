@@ -6,5 +6,15 @@ export interface AboutMessage {
     };
 }
 
-export type Message = AboutMessage;
+export interface StartTestMessage {
+    type: 'startTest';
+    data: {
+        url: string;
+    };
+}
+
+export type Message
+    = AboutMessage
+    | StartTestMessage;
+
 export type MessageType = Message['type'];
