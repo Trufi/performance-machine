@@ -13,8 +13,24 @@ export interface StartTestMessage {
     };
 }
 
+export interface TestResultsMessage {
+    type: 'testResults';
+    data: {
+        samples: Array<{
+            mean: number;
+            deviation: number;
+        }>;
+    };
+}
+
+export interface UnxpectedTestClosingMessage {
+    type: 'unexpectedTestClosing';
+}
+
 export type Message
     = AboutMessage
+    | TestResultsMessage
+    | UnxpectedTestClosingMessage
     | StartTestMessage;
 
 export type MessageType = Message['type'];
