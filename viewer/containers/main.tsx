@@ -46,7 +46,7 @@ export class Main extends React.Component<MainProps, MainState> {
             type: 'startTest',
             data: {
                 deviceId: Number(this.selectElement.value),
-                url: encodeURIComponent(this.inputElement.value),
+                url: this.inputElement.value,
             },
         };
 

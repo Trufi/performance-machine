@@ -71,7 +71,7 @@ function startTest(msg: StartTestMessage) {
     const {data: {url, runId}} = msg;
     test = {
         runId,
-        url: decodeURIComponent(url),
+        url,
     };
 
     startTestSample();
