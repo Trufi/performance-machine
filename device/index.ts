@@ -27,6 +27,7 @@ function connect() {
     ws.addEventListener('open', () => {
         console.log('Connected');
         clearTimeout(connectTimeout);
+        sendAbout();
     });
 
     ws.addEventListener('close', () => {
@@ -35,8 +36,6 @@ function connect() {
     });
 
     ws.addEventListener('message', onAggregatorMessage);
-
-    sendAbout();
 }
 
 connect();

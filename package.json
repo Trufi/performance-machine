@@ -15,7 +15,7 @@
   "scripts": {
     "server": "ts-node -O '{\"module\": \"commonjs\"}' server",
     "build": "webpack --env.production",
-    "dev": "webpack-dev-server",
+    "dev": "webpack -w",
     "test": "tslint 'server/**/*.ts' 'viewer/**/*.ts' 'device/**/*.ts' 'types.ts'"
   },
   "dependencies": {
@@ -38,7 +38,6 @@
     "ts-loader": "^3.1.1",
     "tslint": "^5.8.0",
     "tslint-eslint-rules": "^4.1.1",
-    "webpack": "^3.8.1",
-    "webpack-dev-server": "^2.9.4"
+    "webpack": "^3.8.1"
   }
 }

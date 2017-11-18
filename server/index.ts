@@ -7,10 +7,10 @@ import { Viewer, Device, TestsData } from './types';
 const log = (msg: string | undefined) => console.log(msg);
 
 const app = express();
-const port = process.env.PORT || process.env.port || 9001;
+const port = process.env.PORT || process.env.port || 3000;
 const server = app.listen(port, () => log(`Server listen on ${port} port`));
 
-app.use(express.static(path.join(__dirname, '../client')));
+app.use(express.static(path.join(__dirname, '../dist')));
 
 const wsServer = new ws.Server({server});
 
@@ -31,6 +31,8 @@ wsServer.on('connection', (ws) => {
             return;
         }
 
+        console.log(msg);
+
         switch (msg.type) {
             case 'about': {
                 const data = msg.data;
@@ -50,15 +52,13 @@ function parseMessage(data: ws.Data): Message | undefined {
         return;
     }
 
-    let ev: MessageEvent | undefined;
+    let msg: Message | undefined;
 
     try {
-        ev = JSON.parse(data);
+        msg = JSON.parse(data);
     } catch (err) {}
 
-    if (ev) {
-        return ev.data as Message;
-    }
+    return msg;
 }
 
 function initializeDevice(id: number, ws: ws, data: AboutMessage['data']): void {
@@ -113,7 +113,7 @@ function sendMessage(ws: ws, msg: Message) {
 }
 
 function deviceOnMessage(device: Device, msg: Message) {
-    console.log('device', device, msg);
+    console.log('device', msg);
 
     switch (msg.type) {
         case 'testResults':
@@ -123,8 +123,8 @@ function deviceOnMessage(device: Device, msg: Message) {
     }
 }
 
-function viewerOnMessage(viewer: Viewer, msg: Message) {
-    console.log('viewer', viewer, msg);
+function viewerOnMessage(_viewer: Viewer, msg: Message) {
+    console.log('viewer', msg);
 }
 
 function saveTestData(device: Device, msg: TestResultsMessage) {

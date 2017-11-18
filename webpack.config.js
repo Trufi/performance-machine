@@ -29,7 +29,7 @@ module.exports = (env = {}) => {
         },
 
         entry: {
-            viewer: './viewer/index.ts',
+            viewer: './viewer/index.tsx',
             device: './device/index.ts',
         },
 
@@ -42,22 +42,9 @@ module.exports = (env = {}) => {
         plugins: [
             tsCheckerPlugin,
         ],
-    };
 
-    if (env.production) {
-        config.devtool = 'source-map';
-    } else {
-        config.devtool = 'eval-source-map';
-        config.devServer = {
-            contentBase: path.resolve(__dirname, 'dist'),
-            host: '0.0.0.0',
-            port: 3000,
-            stats: {
-                modules: false,
-            },
-            disableHostCheck: true,
-        };
-    }
+        devtool: 'source-map',
+    };
 
     return config;
 };

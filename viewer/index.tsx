@@ -1,5 +1,20 @@
-import { renderAggregatorData } from './render';
-import { Message, AboutMessage } from '../types';
+import * as React from 'react';
+import { render } from 'react-dom';
+import { Main } from './containers/main';
+import { Message, ViewerMessage, AboutMessage, AggregatorData } from '../types';
+
+const main = render(
+    <Main sendMessage={sendMessage}/>,
+    document.getElementById('root'),
+) as Main;
+
+function renderAggregatorData(data: AggregatorData) {
+    console.log(data);
+    main.setState({
+        ...main.state,
+        aggregatorData: data,
+    });
+}
 
 let ws: WebSocket;
 
@@ -10,6 +25,7 @@ function connect() {
     ws.addEventListener('open', () => {
         console.log('Connected');
         clearTimeout(connectTimeout);
+        sendAbout();
     });
 
     ws.addEventListener('close', () => {
@@ -18,13 +34,11 @@ function connect() {
     });
 
     ws.addEventListener('message', onMessage);
-
-    sendAbout();
 }
 
 connect();
 
-function sendMessage(msg: Message) {
+function sendMessage(msg: ViewerMessage) {
     console.log('send', msg);
     ws.send(JSON.stringify(msg));
 }
@@ -33,7 +47,7 @@ function sendAbout() {
     const msg: AboutMessage = {
         type: 'about',
         data: {
-            type: 'client',
+            type: 'viewer',
             userAgent: '',
         },
     };
@@ -46,9 +60,7 @@ function onMessage(ev: MessageEvent) {
     console.log('message', msg);
 
     switch (msg.type) {
-        case 'startTest':
-            break;
+        case 'aggregatorData':
+            return renderAggregatorData(msg.data);
     }
 }
-
-renderAggregatorData('123');

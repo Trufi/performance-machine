@@ -2,7 +2,7 @@ import { TestsData } from './server/types';
 export interface AboutMessage {
     type: 'about';
     data: {
-        type: 'device' | 'client';
+        type: 'device' | 'viewer';
         userAgent: string;
     };
 }
@@ -32,16 +32,18 @@ export interface UnxpectedTestClosingMessage {
     type: 'unexpectedTestClosing';
 }
 
+export interface AggregatorDeviceData {
+    id: number;
+    userAgent: string;
+    runningTest?: {
+        url: string;
+        name?: string;
+        startTime: number;
+    };
+}
+
 export interface AggregatorData {
-    devices: Array<{
-        id: number;
-        userAgent: string;
-        runningTest?: {
-            url: string;
-            name?: string;
-            startTime: number;
-        };
-    }>;
+    devices: AggregatorDeviceData[];
     testsData: TestsData;
 }
 
@@ -56,5 +58,16 @@ export type Message
     | TestResultsMessage
     | UnxpectedTestClosingMessage
     | StartTestMessage;
+
+export interface StartTestViewerMessage {
+    type: 'startTest';
+    data: {
+        url: string;
+    };
+}
+
+export type ViewerMessage
+    = AboutMessage
+    | StartTestViewerMessage;
 
 export type MessageType = Message['type'];
