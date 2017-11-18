@@ -29,7 +29,7 @@ function randomKey() {
 }
 
 const object: {[key: string]: number} = {};
-for (let i = 0; i < 1000; i++) {
+for (let i = 0; i < 10000; i++) {
     object[randomKey()] = Math.round(random() * 1e5);
 }
 

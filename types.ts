@@ -62,6 +62,7 @@ export type Message
 export interface StartTestViewerMessage {
     type: 'startTest';
     data: {
+        deviceId: number;
         url: string;
     };
 }

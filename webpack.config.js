@@ -31,6 +31,7 @@ module.exports = (env = {}) => {
         entry: {
             viewer: './viewer/index.tsx',
             device: './device/index.ts',
+            examples: './examples/index.ts',
         },
 
         output: {
@@ -55,4 +56,5 @@ function copyAssets() {
 
     fs.copySync(path.join(root, 'viewer/index.html'), path.join(dist, 'viewer/index.html'));
     fs.copySync(path.join(root, 'device/index.html'), path.join(dist, 'device/index.html'));
+    fs.copySync(path.join(root, 'examples/index.html'), path.join(dist, 'examples/index.html'));
 }

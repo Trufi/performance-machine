@@ -1,7 +1,14 @@
 import * as express from 'express';
 import * as path from 'path';
 import * as ws from 'ws';
-import { Message, AboutMessage, TestResultsMessage, AggregatorDataMessage } from '../types';
+import {
+    Message,
+    AboutMessage,
+    TestResultsMessage,
+    AggregatorDataMessage,
+    ViewerMessage,
+    StartTestMessage,
+} from '../types';
 import { Viewer, Device, TestsData } from './types';
 
 const log = (msg: string | undefined) => console.log(msg);
@@ -15,6 +22,8 @@ app.use(express.static(path.join(__dirname, '../dist')));
 const wsServer = new ws.Server({server});
 
 const testsData: TestsData = {};
+
+let testRunIdCounter = 0;
 
 const viewers: Viewer[] = [];
 const devices: Device[] = [];
@@ -47,12 +56,12 @@ wsServer.on('connection', (ws) => {
     });
 });
 
-function parseMessage(data: ws.Data): Message | undefined {
+function parseMessage(data: ws.Data): any | undefined {
     if (typeof data !== 'string') {
         return;
     }
 
-    let msg: Message | undefined;
+    let msg: any | undefined;
 
     try {
         msg = JSON.parse(data);
@@ -69,6 +78,7 @@ function initializeDevice(id: number, ws: ws, data: AboutMessage['data']): void 
         userAgent,
     };
     devices.push(device);
+    sendDataToViewers();
     ws.on('message', (data) => {
         const msg = parseMessage(data);
         if (msg) {
@@ -81,6 +91,7 @@ function initializeDevice(id: number, ws: ws, data: AboutMessage['data']): void 
             devices.splice(index, 1);
         }
         log('Disconnected device' + id);
+        // TODO: device removing
     });
 }
 
@@ -123,8 +134,13 @@ function deviceOnMessage(device: Device, msg: Message) {
     }
 }
 
-function viewerOnMessage(_viewer: Viewer, msg: Message) {
+function viewerOnMessage(_viewer: Viewer, msg: ViewerMessage) {
     console.log('viewer', msg);
+
+    switch (msg.type) {
+        case 'startTest':
+            return startTest(msg.data.deviceId, msg.data.url);
+    }
 }
 
 function saveTestData(device: Device, msg: TestResultsMessage) {
@@ -164,6 +180,7 @@ function saveTestData(device: Device, msg: TestResultsMessage) {
 
 function freeDevice(device: Device) {
     device.runningTest = undefined;
+    sendDataToViewers();
 }
 
 function getAggregatorDataMessage(): AggregatorDataMessage {
@@ -179,6 +196,33 @@ function getAggregatorDataMessage(): AggregatorDataMessage {
 function sendDataToViewers() {
     const msg = getAggregatorDataMessage();
     viewers.forEach((viewer) => sendMessage(viewer.ws, msg));
+}
+
+function startTest(deviceId: number, url: string) {
+    const device = devices.find((el) => el.id === deviceId);
+
+    if (!device || device.runningTest) {
+        return;
+    }
+
+    const runId = testRunIdCounter++;
+
+    device.runningTest = {
+        startTime: Date.now(),
+        url,
+        runId,
+    };
+
+    const msg: StartTestMessage = {
+        type: 'startTest',
+        data: {
+            runId,
+            url,
+        },
+    };
+
+    sendMessage(device.ws, msg);
+    sendDataToViewers();
 }
 
 // error handlers

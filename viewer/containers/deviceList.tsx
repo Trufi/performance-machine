@@ -5,10 +5,11 @@ const Device = (data: AggregatorDeviceData) => {
     return <div>
         <div>ID: {data.id}</div>
         <div>User-agent: {data.userAgent}</div>
-        {data.runningTest && <div>
-            <div>Test url: {data.runningTest.url} start: {data.runningTest.startTime}
-                name: {data.runningTest.name}</div>
-        </div>}
+        {data.runningTest && <ul>
+            <li>Test url: {decodeURIComponent(data.runningTest.url)}</li>
+            <li>start: {(new Date(data.runningTest.startTime)).toString()}</li>
+            <li>name: {data.runningTest.name}</li>
+        </ul>}
     </div>;
 };
 

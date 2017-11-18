@@ -11,6 +11,7 @@ interface MainState {
 }
 
 export class Main extends React.Component<MainProps, MainState> {
+    private selectElement: HTMLSelectElement;
     private inputElement: HTMLInputElement;
 
     constructor(props: MainProps) {
@@ -22,12 +23,19 @@ export class Main extends React.Component<MainProps, MainState> {
     public render() {
         const {aggregatorData} = this.state;
 
+        if (!aggregatorData || !aggregatorData.devices.length) {
+            return <div>No devices</div>;
+        }
+
+        const {devices} = aggregatorData;
+
         return <div>
-            {aggregatorData && [
-                <h1>Devices:</h1>,
-                <DeviceList devices={aggregatorData.devices}/>,
-            ]}
+            <h1>Devices:</h1>
+            <DeviceList devices={devices}/>
             <h1>Start test:</h1>
+            <select ref={(el: HTMLSelectElement) => this.selectElement = el}>
+                {devices.map((device, i) => <option key={i} value={device.id}>{device.id}</option>)}
+            </select>
             <input type='text' ref={(el: HTMLInputElement) => this.inputElement = el}/>
             <input type='button' onClick={this.buttonOnClick} value='Start test'/>
         </div>;
@@ -37,6 +45,7 @@ export class Main extends React.Component<MainProps, MainState> {
         const msg: StartTestViewerMessage = {
             type: 'startTest',
             data: {
+                deviceId: Number(this.selectElement.value),
                 url: encodeURIComponent(this.inputElement.value),
             },
         };

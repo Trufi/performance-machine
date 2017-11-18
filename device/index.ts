@@ -71,7 +71,7 @@ function startTest(msg: StartTestMessage) {
     const {data: {url, runId}} = msg;
     test = {
         runId,
-        url,
+        url: decodeURIComponent(url),
     };
 
     startTestSample();
@@ -95,7 +95,7 @@ function startTestSample() {
         closeCheckInterval,
     };
 
-    openedWindow.addEventListener('message', onTestMessage);
+    window.addEventListener('message', onTestMessage);
 }
 
 function checkMaybeTestClosed() {
@@ -120,12 +120,15 @@ function closeTestSample() {
         return;
     }
 
-    test.sample.window.removeEventListener('message', (onTestMessage));
+    if (test.sample.window.removeEventListener) {
+        test.sample.window.removeEventListener('message', onTestMessage);
+    }
     test.sample.window.close();
     clearInterval(test.sample.closeCheckInterval);
 }
 
 function onTestMessage(ev: MessageEvent) {
+    console.log(ev);
     if (!test) {
         return;
     }
