@@ -1,8 +1,8 @@
 import * as express from 'express';
 import * as path from 'path';
 import * as ws from 'ws';
-import { Message, AboutMessage } from '../types';
-import { Viewer, Device } from './types';
+import { Message, AboutMessage, TestResultsMessage, AggregatorDataMessage } from '../types';
+import { Viewer, Device, TestsData } from './types';
 
 const log = (msg: string | undefined) => console.log(msg);
 
@@ -13,6 +13,8 @@ const server = app.listen(port, () => log(`Server listen on ${port} port`));
 app.use(express.static(path.join(__dirname, '../client')));
 
 const wsServer = new ws.Server({server});
+
+const testsData: TestsData = {};
 
 const viewers: Viewer[] = [];
 const devices: Device[] = [];
@@ -48,13 +50,15 @@ function parseMessage(data: ws.Data): Message | undefined {
         return;
     }
 
-    let ev: any;
+    let ev: MessageEvent | undefined;
 
     try {
         ev = JSON.parse(data);
     } catch (err) {}
 
-    return ev.data as Message | undefined;
+    if (ev) {
+        return ev.data as Message;
+    }
 }
 
 function initializeDevice(id: number, ws: ws, data: AboutMessage['data']): void {
@@ -99,14 +103,82 @@ function initializeViewer(id: number, ws: ws, _data: AboutMessage['data']): void
         }
         log('Disconnected viewer' + id);
     });
+
+    sendMessage(ws, getAggregatorDataMessage());
+}
+
+function sendMessage(ws: ws, msg: Message) {
+    console.log('send', msg);
+    ws.send(JSON.stringify(msg));
 }
 
 function deviceOnMessage(device: Device, msg: Message) {
-    console.log(device, msg);
+    console.log('device', device, msg);
+
+    switch (msg.type) {
+        case 'testResults':
+            return saveTestData(device, msg);
+        case 'unexpectedTestClosing':
+            return freeDevice(device);
+    }
 }
 
 function viewerOnMessage(viewer: Viewer, msg: Message) {
-    console.log(viewer, msg);
+    console.log('viewer', viewer, msg);
+}
+
+function saveTestData(device: Device, msg: TestResultsMessage) {
+    const {data: {runId, name, description, samples}} = msg;
+
+    if (
+        !device.runningTest ||
+        device.runningTest.runId !== runId
+    ) {
+        return;
+    }
+
+    const {runningTest: {url}} = device;
+
+    if (!testsData[url]) {
+        testsData[url] = {
+            url,
+            name,
+            description,
+            results: [],
+        };
+    }
+
+    const testData = testsData[url];
+    testData.results.push({
+        date: Date.now(),
+        device: {
+            id: device.id,
+            userAgent: device.userAgent,
+        },
+        samples,
+    });
+
+    freeDevice(device);
+    sendDataToViewers();
+}
+
+function freeDevice(device: Device) {
+    device.runningTest = undefined;
+}
+
+function getAggregatorDataMessage(): AggregatorDataMessage {
+    return {
+        type: 'aggregatorData',
+        data: {
+            devices: devices.map(({id, userAgent, runningTest}) => ({id, userAgent, runningTest})),
+            testsData,
+        },
+    };
+}
+
+function sendDataToViewers() {
+    const msg = getAggregatorDataMessage();
+    viewers.forEach((viewer) => sendMessage(viewer.ws, msg));
 }
 
 // error handlers

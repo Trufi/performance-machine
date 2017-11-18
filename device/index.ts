@@ -2,6 +2,7 @@ import { Message, AboutMessage, StartTestMessage, TestResultsMessage, UnxpectedT
 import { TestMessage, TestSampleResult } from '../caseUtils/types';
 
 interface Test {
+    runId: number;
     url: string;
     sample?: {
         window: Window;
@@ -33,23 +34,24 @@ function connect() {
         connectTimeout = setTimeout(connect, 5 * 1000);
     });
 
-    ws.addEventListener('message', (ev) => {
-        const msg: Message = JSON.parse(ev.data);
-        console.log('message', msg);
-
-        switch (msg.type) {
-            case 'startTest':
-                startTest(msg);
-                break;
-        }
-    });
+    ws.addEventListener('message', onAggregatorMessage);
 
     sendAbout();
 }
 
 connect();
 
-function sendMessage(msg: Message) {
+function onAggregatorMessage(ev: MessageEvent) {
+    const msg: Message = JSON.parse(ev.data);
+    console.log('message', msg);
+
+    switch (msg.type) {
+        case 'startTest':
+            return startTest(msg);
+    }
+}
+
+function sendAggregatorMessage(msg: Message) {
     console.log('send', msg);
     ws.send(JSON.stringify(msg));
 }
@@ -63,12 +65,13 @@ function sendAbout() {
         },
     };
 
-    sendMessage(msg);
+    sendAggregatorMessage(msg);
 }
 
 function startTest(msg: StartTestMessage) {
-    const {data: {url}} = msg;
+    const {data: {url, runId}} = msg;
     test = {
+        runId,
         url,
     };
 
@@ -110,7 +113,7 @@ function unexpectedTestClosing() {
         type: 'unexpectedTestClosing',
     };
 
-    sendMessage(msg);
+    sendAggregatorMessage(msg);
 }
 
 function closeTestSample() {
@@ -169,14 +172,19 @@ function sendTestResults() {
         return;
     }
 
+    const {runId, data: {name, description, samplesData}} = test;
+
     const msg: TestResultsMessage = {
         type: 'testResults',
         data: {
-            samples: test.data.samplesData,
+            runId,
+            name,
+            description,
+            samples: samplesData,
         },
     };
 
-    sendMessage(msg);
+    sendAggregatorMessage(msg);
 
     test = undefined;
 }

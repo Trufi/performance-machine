@@ -13,7 +13,7 @@ module.exports = (env = {}) => {
     const config = {
         module: {
             rules: [{
-                test: /\.ts$/,
+                test: /(\.ts|\.tsx)$/,
                 exclude: /node_modules/,
                 use: {
                     loader: 'ts-loader',
@@ -25,7 +25,7 @@ module.exports = (env = {}) => {
         },
 
         resolve: {
-            extensions: ['.ts', '.js'],
+            extensions: ['.ts', '.js', '.tsx'],
         },
 
         entry: {
