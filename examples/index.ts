@@ -1,5 +1,5 @@
-import { send } from '../caseUtils';
-import { getMean, getDeviation } from '../caseUtils/index';
+import { send } from '../src/caseUtils';
+import { getMean, getDeviation } from '../src/caseUtils/index';
 
 send({
     type: 'testInfo',

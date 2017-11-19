@@ -17,7 +17,7 @@ const app = express();
 const port = process.env.PORT || process.env.port || 3000;
 const server = app.listen(port, () => log(`Server listen on ${port} port`));
 
-app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.static(path.join(__dirname, '../../dist')));
 
 const wsServer = new ws.Server({server});
 

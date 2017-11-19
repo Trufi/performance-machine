@@ -13,10 +13,10 @@
   },
   "license": "MIT",
   "scripts": {
-    "server": "ts-node -O '{\"module\": \"commonjs\"}' server",
+    "server": "ts-node -O '{\"module\": \"commonjs\"}' src/server",
     "build": "webpack --env.production",
     "dev": "webpack -w",
-    "test": "tslint 'server/**/*.ts' 'viewer/**/*.ts' 'device/**/*.ts' 'types.ts'"
+    "test": "tslint 'src/**/*.ts' 'exmaples/**/*.ts'"
   },
   "dependencies": {
     "express": "^4.16.2",

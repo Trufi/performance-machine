@@ -7,7 +7,7 @@ copyAssets();
 
 module.exports = (env = {}) => {
     const tsCheckerPlugin = new ForkTsCheckerWebpackPlugin({
-        watch: ['./viewer', './device'],
+        watch: ['./src'],
     });
 
     const config = {
@@ -29,8 +29,8 @@ module.exports = (env = {}) => {
         },
 
         entry: {
-            viewer: './viewer/index.tsx',
-            device: './device/index.ts',
+            viewer: './src/viewer/index.tsx',
+            device: './src/device/index.ts',
             examples: './examples/index.ts',
         },
 
@@ -54,7 +54,7 @@ function copyAssets() {
     const root = __dirname;
     const dist = path.join(root, 'dist');
 
-    fs.copySync(path.join(root, 'viewer/index.html'), path.join(dist, 'viewer/index.html'));
-    fs.copySync(path.join(root, 'device/index.html'), path.join(dist, 'device/index.html'));
+    fs.copySync(path.join(root, 'src/viewer/index.html'), path.join(dist, 'viewer/index.html'));
+    fs.copySync(path.join(root, 'src/device/index.html'), path.join(dist, 'device/index.html'));
     fs.copySync(path.join(root, 'examples/index.html'), path.join(dist, 'examples/index.html'));
 }
