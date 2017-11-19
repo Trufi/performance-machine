@@ -7,6 +7,7 @@ export interface Viewer {
 }
 
 export interface Device {
+    name?: string;
     id: number;
     ws: ws;
     userAgent: string;

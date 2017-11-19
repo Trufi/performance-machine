@@ -2,15 +2,16 @@ import * as React from 'react';
 import { AggregatorDeviceData } from '../../types';
 
 const Device = (data: AggregatorDeviceData) => {
-    return <div>
-        <div>ID: {data.id}</div>
-        <div>User-agent: {data.userAgent}</div>
+    return <ul>
+        <li>Name: {data.name ? data.name : '...'}</li>
+        <li>ID: {data.id}</li>
+        <li>User-agent: {data.userAgent}</li>
         {data.runningTest && <ul>
             <li>Test url: {decodeURIComponent(data.runningTest.url)}</li>
             <li>start: {(new Date(data.runningTest.startTime)).toString()}</li>
             <li>name: {data.runningTest.name}</li>
         </ul>}
-    </div>;
+    </ul>;
 };
 
 export const DeviceList = ({devices}: {devices: AggregatorDeviceData[]}) => {

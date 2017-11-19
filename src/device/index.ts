@@ -5,9 +5,36 @@ import {
     UnxpectedTestClosingMessage,
     ToDeviceMessage,
     FromDeviceMessage,
+    InfoToDeviceMessage,
+    NameFromDeviceMessage,
 } from '../types';
 import { TestMessage, TestSampleResult } from '../caseUtils/types';
 import { getMean } from '../caseUtils';
+
+const deviceIdElement = document.getElementById('device-id') as HTMLElement;
+const deviceNameElement = document.getElementById('device-name') as HTMLElement;
+
+const namePickElement = document.getElementById('name-pick') as HTMLElement;
+const namePickTextElement = document.getElementById('name-pick-text') as HTMLInputElement;
+const namePickButtonElement = document.getElementById('name-pick-button') as HTMLElement;
+namePickButtonElement.addEventListener('click', () => {
+    const name = namePickTextElement.value;
+    if (!name.length || !info) {
+        return;
+    }
+
+    namePickElement.style.display = 'none';
+    info.name = name;
+    const msg: NameFromDeviceMessage = {
+        type: 'name',
+        data: {
+            name,
+        },
+    };
+    sendAggregatorMessage(msg);
+    updateInfo();
+    saveInfoToStorage();
+});
 
 interface Test {
     runId: number;
@@ -25,8 +52,15 @@ interface Test {
     };
 }
 
+interface Info {
+    name?: string;
+    id: number;
+}
+
 let test: Test | undefined;
 let ws: WebSocket;
+let info = getInfoFromStorage();
+updateInfo();
 
 function connect() {
     let connectTimeout: NodeJS.Timer;
@@ -55,6 +89,8 @@ function onAggregatorMessage(ev: MessageEvent) {
     switch (msg.type) {
         case 'startTest':
             return startTest(msg);
+        case 'info':
+            return setInfo(msg);
     }
 }
 
@@ -72,7 +108,37 @@ function sendAbout() {
         },
     };
 
+    if (info) {
+        msg.data.id = info.id;
+        msg.data.name = info.name;
+    }
+
     sendAggregatorMessage(msg);
+}
+
+function setInfo(msg: InfoToDeviceMessage) {
+    if (!info) {
+        const {id, name} = msg.data;
+        info = {id};
+        if (name) {
+            info.name = name;
+        }
+        updateInfo();
+        saveInfoToStorage();
+    }
+}
+
+function updateInfo() {
+    if (!info) {
+        return;
+    }
+    deviceIdElement.innerHTML = String(info.id);
+
+    if (info.name) {
+        deviceNameElement.innerHTML = info.name;
+    } else {
+        namePickElement.style.display = 'block';
+    }
 }
 
 function startTest(msg: StartTestMessage) {
@@ -210,4 +276,17 @@ function sendTestResults() {
     sendAggregatorMessage(msg);
 
     test = undefined;
+}
+
+function getInfoFromStorage(): Info | undefined {
+    const str = localStorage.getItem('info');
+    if (str) {
+        return JSON.parse(str) as Info;
+    }
+}
+
+function saveInfoToStorage(): void {
+    if (info) {
+        localStorage.setItem('info', JSON.stringify(info));
+    }
 }

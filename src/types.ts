@@ -6,6 +6,8 @@ export interface AboutMessage {
     data: {
         type: 'device' | 'viewer';
         userAgent: string;
+        name?: string;
+        id?: number;
     };
 }
 
@@ -31,7 +33,15 @@ export interface UnxpectedTestClosingMessage {
     type: 'unexpectedTestClosing';
 }
 
+export interface NameFromDeviceMessage {
+    type: 'name';
+    data: {
+        name: string;
+    };
+}
+
 export interface AggregatorDeviceData {
+    name?: string;
     id: number;
     userAgent: string;
     runningTest?: {
@@ -51,6 +61,14 @@ export interface AggregatorDataMessage {
     data: AggregatorData;
 }
 
+export interface InfoToDeviceMessage {
+    type: 'info';
+    data: {
+        id: number;
+        name?: string;
+    };
+}
+
 export interface StartTestFromViewerMessage {
     type: 'startTest';
     data: {
@@ -60,18 +78,20 @@ export interface StartTestFromViewerMessage {
 }
 
 export type ToViewerMessage
-= AggregatorDataMessage;
+    = AggregatorDataMessage;
 
 export type FromViewerMessage
     = AboutMessage
     | StartTestFromViewerMessage;
 
 export type ToDeviceMessage
-    = StartTestMessage;
+    = StartTestMessage
+    | InfoToDeviceMessage;
 
 export type FromDeviceMessage
     = AboutMessage
     | TestResultsMessage
+    | NameFromDeviceMessage
     | UnxpectedTestClosingMessage;
 
 export type Message

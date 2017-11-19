@@ -9,6 +9,7 @@ import {
     FromViewerMessage,
     StartTestMessage,
     FromDeviceMessage,
+    InfoToDeviceMessage,
 } from '../types';
 import { Viewer, Device, TestsData } from './types';
 
@@ -32,9 +33,6 @@ const devices: Device[] = [];
 let idCounter = 0;
 
 wsServer.on('connection', (ws) => {
-    const id = ++idCounter;
-    log('Connected ' + id);
-
     ws.once('message', (data: ws.Data) => {
         const msg = parseMessage(data);
         if (!msg) {
@@ -47,9 +45,9 @@ wsServer.on('connection', (ws) => {
             case 'about': {
                 const data = msg.data;
                 if (data.type === 'device') {
-                    initializeDevice(id, ws, data);
+                    initializeDevice(ws, data);
                 } else {
-                    initializeViewer(id, ws, data);
+                    initializeViewer(ws, data);
                 }
                 break;
             }
@@ -71,15 +69,35 @@ function parseMessage(data: ws.Data): any | undefined {
     return msg;
 }
 
-function initializeDevice(id: number, ws: ws, data: AboutMessage['data']): void {
+function initializeDevice(ws: ws, data: AboutMessage['data']): void {
     const {userAgent} = data;
+    const id = data.id !== undefined ? data.id : idCounter;
+    idCounter = id + 1;
+
     const device: Device = {
         id,
         ws,
         userAgent,
     };
+    if (data.name) {
+        device.name = data.name;
+    }
     devices.push(device);
     sendDataToViewers();
+
+    log('Connect device ' + id);
+
+    // If device has no own id
+    if (data.id === undefined) {
+        const msg: InfoToDeviceMessage = {
+            type: 'info',
+            data: {
+                id,
+            },
+        };
+        sendMessage(ws, msg);
+    }
+
     ws.on('message', (data) => {
         const msg = parseMessage(data);
         if (msg) {
@@ -91,17 +109,21 @@ function initializeDevice(id: number, ws: ws, data: AboutMessage['data']): void 
         if (index !== -1) {
             devices.splice(index, 1);
         }
-        log('Disconnected device' + id);
+        log('Disconnected device ' + id);
         // TODO: device removing
     });
 }
 
-function initializeViewer(id: number, ws: ws, _data: AboutMessage['data']): void {
+function initializeViewer(ws: ws, _data: AboutMessage['data']): void {
+    const id = idCounter++;
     const viewer: Viewer = {
         id,
         ws,
     };
     viewers.push(viewer);
+
+    log('Connect viewer ' + id);
+
     ws.on('message', (data) => {
         const msg = parseMessage(data);
         if (msg) {
@@ -113,7 +135,7 @@ function initializeViewer(id: number, ws: ws, _data: AboutMessage['data']): void
         if (index !== -1) {
             viewers.splice(index, 1);
         }
-        log('Disconnected viewer' + id);
+        log('Disconnected viewer ' + id);
     });
 
     sendMessage(ws, getAggregatorDataMessage());
@@ -132,6 +154,8 @@ function deviceOnMessage(device: Device, msg: FromDeviceMessage) {
             return saveTestData(device, msg);
         case 'unexpectedTestClosing':
             return freeDevice(device);
+        case 'name':
+            return device.name = msg.data.name;
     }
 }
 
@@ -188,7 +212,7 @@ function getAggregatorDataMessage(): AggregatorDataMessage {
     return {
         type: 'aggregatorData',
         data: {
-            devices: devices.map(({id, userAgent, runningTest}) => ({id, userAgent, runningTest})),
+            devices: devices.map(({name, id, userAgent, runningTest}) => ({name, id, userAgent, runningTest})),
             testsData,
         },
     };
