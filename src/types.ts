@@ -52,14 +52,7 @@ export interface AggregatorDataMessage {
     data: AggregatorData;
 }
 
-export type Message
-    = AboutMessage
-    | AggregatorDataMessage
-    | TestResultsMessage
-    | UnxpectedTestClosingMessage
-    | StartTestMessage;
-
-export interface StartTestViewerMessage {
+export interface StartTestFromViewerMessage {
     type: 'startTest';
     data: {
         deviceId: number;
@@ -67,8 +60,25 @@ export interface StartTestViewerMessage {
     };
 }
 
-export type ViewerMessage
+export type ToViewerMessage
+= AggregatorDataMessage;
+
+export type FromViewerMessage
     = AboutMessage
-    | StartTestViewerMessage;
+    | StartTestFromViewerMessage;
+
+export type ToDeviceMessage
+    = StartTestMessage;
+
+export type FromDeviceMessage
+    = AboutMessage
+    | TestResultsMessage
+    | UnxpectedTestClosingMessage;
+
+export type Message
+    = ToViewerMessage
+    | FromViewerMessage
+    | ToDeviceMessage
+    | FromDeviceMessage;
 
 export type MessageType = Message['type'];

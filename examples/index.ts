@@ -1,13 +1,10 @@
-import { send } from '../src/caseUtils';
+import { info, result, end } from '../src/caseUtils';
 import { getMean, getDeviation } from '../src/caseUtils/index';
 
-send({
-    type: 'testInfo',
-    data: {
-        name: 'Object iteration',
-        description: '',
-        samplesCount: 5,
-    },
+info({
+    name: 'Object iteration',
+    description: '',
+    samplesCount: 5,
 });
 
 const random = (() => {
@@ -49,10 +46,9 @@ for (let j = 0; j < 100; j++) {
 
 console.log(i);
 
-send({
-    type: 'testSampleResult',
-    data: {
-        mean: getMean(sample),
-        deviation: getDeviation(sample),
-    },
+result({
+    mean: getMean(sample),
+    deviation: getDeviation(sample),
 });
+
+end();

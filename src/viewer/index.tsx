@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { render } from 'react-dom';
 import { Main } from './containers/main';
-import { Message, ViewerMessage, AboutMessage, AggregatorData } from '../types';
+import { FromViewerMessage, AboutMessage, AggregatorData, ToViewerMessage } from '../types';
 
 const main = render(
     <Main sendMessage={sendMessage}/>,
@@ -38,7 +38,7 @@ function connect() {
 
 connect();
 
-function sendMessage(msg: ViewerMessage) {
+function sendMessage(msg: FromViewerMessage) {
     console.log('send', msg);
     ws.send(JSON.stringify(msg));
 }
@@ -56,7 +56,7 @@ function sendAbout() {
 }
 
 function onMessage(ev: MessageEvent) {
-    const msg: Message = JSON.parse(ev.data);
+    const msg: ToViewerMessage = JSON.parse(ev.data);
     console.log('message', msg);
 
     switch (msg.type) {

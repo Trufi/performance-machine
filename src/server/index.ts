@@ -6,8 +6,9 @@ import {
     AboutMessage,
     TestResultsMessage,
     AggregatorDataMessage,
-    ViewerMessage,
+    FromViewerMessage,
     StartTestMessage,
+    FromDeviceMessage,
 } from '../types';
 import { Viewer, Device, TestsData } from './types';
 
@@ -123,7 +124,7 @@ function sendMessage(ws: ws, msg: Message) {
     ws.send(JSON.stringify(msg));
 }
 
-function deviceOnMessage(device: Device, msg: Message) {
+function deviceOnMessage(device: Device, msg: FromDeviceMessage) {
     console.log('device', msg);
 
     switch (msg.type) {
@@ -134,7 +135,7 @@ function deviceOnMessage(device: Device, msg: Message) {
     }
 }
 
-function viewerOnMessage(_viewer: Viewer, msg: ViewerMessage) {
+function viewerOnMessage(_viewer: Viewer, msg: FromViewerMessage) {
     console.log('viewer', msg);
 
     switch (msg.type) {

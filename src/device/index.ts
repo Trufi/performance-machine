@@ -1,4 +1,11 @@
-import { Message, AboutMessage, StartTestMessage, TestResultsMessage, UnxpectedTestClosingMessage } from '../types';
+import {
+    AboutMessage,
+    StartTestMessage,
+    TestResultsMessage,
+    UnxpectedTestClosingMessage,
+    ToDeviceMessage,
+    FromDeviceMessage,
+} from '../types';
 import { TestMessage, TestSampleResult } from '../caseUtils/types';
 
 interface Test {
@@ -41,7 +48,7 @@ function connect() {
 connect();
 
 function onAggregatorMessage(ev: MessageEvent) {
-    const msg: Message = JSON.parse(ev.data);
+    const msg: ToDeviceMessage = JSON.parse(ev.data);
     console.log('message', msg);
 
     switch (msg.type) {
@@ -50,7 +57,7 @@ function onAggregatorMessage(ev: MessageEvent) {
     }
 }
 
-function sendAggregatorMessage(msg: Message) {
+function sendAggregatorMessage(msg: FromDeviceMessage) {
     console.log('send', msg);
     ws.send(JSON.stringify(msg));
 }
@@ -154,6 +161,13 @@ function onTestMessage(ev: MessageEvent) {
             const {data} = test;
             if (data) {
                 data.samplesData.push(msg.data);
+            }
+            break;
+        }
+
+        case 'testEnd': {
+            const {data} = test;
+            if (data) {
                 closeTestSample();
 
                 data.currentSample++;

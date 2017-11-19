@@ -19,8 +19,13 @@ export interface TestSampleResultMessage {
     data: TestSampleResult;
 }
 
+export interface TestEndMessage {
+    type: 'testEnd';
+}
+
 export type TestMessage
     = TestInfoMessage
+    | TestEndMessage
     | TestSampleResultMessage;
 
 export type Sample = ArrayLike<number>;

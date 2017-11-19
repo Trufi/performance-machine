@@ -1,12 +1,43 @@
-import { TestMessage, Sample } from './types';
+import {
+    TestMessage,
+    Sample,
+    TestEndMessage,
+    TestSampleResultMessage,
+    TestSampleResult,
+    TestInfo,
+    TestInfoMessage,
+} from './types';
 
-export function send(msg: TestMessage): void {
+function send(msg: TestMessage): void {
     const opener: Window | null = window.opener;
     if (!opener) {
         return;
     }
 
     opener.postMessage(JSON.stringify(msg), '*');
+}
+
+export function info(data: TestInfo): void {
+    const msg: TestInfoMessage = {
+        type: 'testInfo',
+        data,
+    };
+    send(msg);
+}
+
+export function result(data: TestSampleResult): void {
+    const msg: TestSampleResultMessage = {
+        type: 'testSampleResult',
+        data,
+    };
+    send(msg);
+}
+
+export function end(): void {
+    const msg: TestEndMessage = {
+        type: 'testEnd',
+    };
+    send(msg);
 }
 
 export function getMean(sample: Sample): number {

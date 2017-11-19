@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { ViewerMessage, StartTestViewerMessage, AggregatorData } from '../../types';
+import { FromViewerMessage, StartTestFromViewerMessage, AggregatorData } from '../../types';
 import { DeviceList } from './deviceList';
 
 interface MainProps {
-    sendMessage: (msg: ViewerMessage) => void;
+    sendMessage: (msg: FromViewerMessage) => void;
 }
 
 interface MainState {
@@ -42,7 +42,7 @@ export class Main extends React.Component<MainProps, MainState> {
     }
 
     private buttonOnClick = () => {
-        const msg: StartTestViewerMessage = {
+        const msg: StartTestFromViewerMessage = {
             type: 'startTest',
             data: {
                 deviceId: Number(this.selectElement.value),
