@@ -1,4 +1,6 @@
 import { TestsData } from './server/types';
+import { TestSampleResult } from './caseUtils/types';
+
 export interface AboutMessage {
     type: 'about';
     data: {
@@ -21,10 +23,7 @@ export interface TestResultsMessage {
         runId: number;
         name: string;
         description: string;
-        samples: Array<{
-            mean: number;
-            deviation: number;
-        }>;
+        sampleData: TestSampleResult;
     };
 }
 

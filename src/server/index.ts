@@ -145,7 +145,7 @@ function viewerOnMessage(_viewer: Viewer, msg: FromViewerMessage) {
 }
 
 function saveTestData(device: Device, msg: TestResultsMessage) {
-    const {data: {runId, name, description, samples}} = msg;
+    const {data: {runId, name, description, sampleData}} = msg;
 
     if (
         !device.runningTest ||
@@ -172,7 +172,7 @@ function saveTestData(device: Device, msg: TestResultsMessage) {
             id: device.id,
             userAgent: device.userAgent,
         },
-        samples,
+        sampleData,
     });
 
     freeDevice(device);

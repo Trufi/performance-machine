@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { FromViewerMessage, StartTestFromViewerMessage, AggregatorData } from '../../types';
 import { DeviceList } from './deviceList';
+import { TestList } from './testList';
 
 interface MainProps {
     sendMessage: (msg: FromViewerMessage) => void;
@@ -27,7 +28,7 @@ export class Main extends React.Component<MainProps, MainState> {
             return <div>No devices</div>;
         }
 
-        const {devices} = aggregatorData;
+        const {devices, testsData} = aggregatorData;
 
         return <div>
             <h1>Devices:</h1>
@@ -38,6 +39,8 @@ export class Main extends React.Component<MainProps, MainState> {
             </select>
             <input type='text' ref={(el: HTMLInputElement) => this.inputElement = el}/>
             <input type='button' onClick={this.buttonOnClick} value='Start test'/>
+            <h1>Tests results:</h1>
+            <TestList data={testsData}/>
         </div>;
     }
 

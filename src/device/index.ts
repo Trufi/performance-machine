@@ -7,6 +7,7 @@ import {
     FromDeviceMessage,
 } from '../types';
 import { TestMessage, TestSampleResult } from '../caseUtils/types';
+import { getMean } from '../caseUtils';
 
 interface Test {
     runId: number;
@@ -190,13 +191,19 @@ function sendTestResults() {
 
     const {runId, data: {name, description, samplesData}} = test;
 
+    const mean = getMean(samplesData.map((data) => data.mean));
+    const deviation = getMean(samplesData.map((data) => data.deviation));
+
     const msg: TestResultsMessage = {
         type: 'testResults',
         data: {
             runId,
             name,
             description,
-            samples: samplesData,
+            sampleData: {
+                mean,
+                deviation,
+            },
         },
     };
 
