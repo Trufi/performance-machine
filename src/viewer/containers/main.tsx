@@ -37,11 +37,18 @@ export class Main extends React.Component<MainProps, MainState> {
             <select ref={(el: HTMLSelectElement) => this.selectElement = el}>
                 {devices.map((device, i) => <option key={i} value={device.id}>{device.id}</option>)}
             </select>
-            <input type='text' ref={(el: HTMLInputElement) => this.inputElement = el}/>
+            <input type='text' ref={(el: HTMLInputElement) => this.inputElement = el}
+                value='http://localhost:3000/examples' onKeyPress={this.onKeyPress}/>
             <input type='button' onClick={this.buttonOnClick} value='Start test'/>
             <h1>Tests results:</h1>
             <TestList data={testsData}/>
         </div>;
+    }
+
+    private onKeyPress = (ev: React.KeyboardEvent<HTMLInputElement>) => {
+        if (ev.which === 13) {
+            this.buttonOnClick();
+        }
     }
 
     private buttonOnClick = () => {
