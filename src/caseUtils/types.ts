@@ -4,28 +4,26 @@ export interface TestInfo {
     samplesCount: number;
 }
 
-export interface TestInfoMessage {
+export interface InfoTestToDeviceMessage {
     type: 'testInfo';
     data: TestInfo;
 }
 
-export interface TestSampleResult {
-    mean: number;
-    deviation: number;
+export interface Sample {
+    name: string;
+    values: number[];
 }
 
-export interface TestSampleResultMessage {
-    type: 'testSampleResult';
-    data: TestSampleResult;
+export interface ResultTestToDeviceMessage {
+    type: 'ResultTestToDeviceMessage';
+    data: Sample;
 }
 
-export interface TestEndMessage {
+export interface EndTestToDeviceMessage {
     type: 'testEnd';
 }
 
-export type TestMessage
-    = TestInfoMessage
-    | TestEndMessage
-    | TestSampleResultMessage;
-
-export type Sample = ArrayLike<number>;
+export type TestToDeviceMessage
+    = InfoTestToDeviceMessage
+    | EndTestToDeviceMessage
+    | ResultTestToDeviceMessage;

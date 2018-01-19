@@ -4,13 +4,13 @@ import * as ws from 'ws';
 import {
     Message,
     AboutMessage,
-    TestResultsMessage,
+    TestResultsDeviceToAggregatorMessage,
     AggregatorDataMessage,
     FromViewerMessage,
-    StartTestMessage,
-    FromDeviceMessage,
-    InfoToDeviceMessage,
-} from '../types';
+    StartTestAggregatorToDeviceMessage,
+    DeviceToAggregatorMessage,
+    InfoAggregatorToDeviceMessage,
+} from '../types/messages';
 import { Viewer, Device, TestsData } from './types';
 
 const log = (msg: string | undefined) => console.log(msg);
@@ -89,7 +89,7 @@ function initializeDevice(ws: ws, data: AboutMessage['data']): void {
 
     // If device has no own id
     if (data.id === undefined) {
-        const msg: InfoToDeviceMessage = {
+        const msg: InfoAggregatorToDeviceMessage = {
             type: 'info',
             data: {
                 id,
@@ -146,7 +146,7 @@ function sendMessage(ws: ws, msg: Message) {
     ws.send(JSON.stringify(msg));
 }
 
-function deviceOnMessage(device: Device, msg: FromDeviceMessage) {
+function deviceOnMessage(device: Device, msg: DeviceToAggregatorMessage) {
     console.log('device', msg);
 
     switch (msg.type) {
@@ -168,8 +168,8 @@ function viewerOnMessage(_viewer: Viewer, msg: FromViewerMessage) {
     }
 }
 
-function saveTestData(device: Device, msg: TestResultsMessage) {
-    const {data: {runId, name, description, sampleData}} = msg;
+function saveTestData(device: Device, msg: TestResultsDeviceToAggregatorMessage) {
+    const {data: {runId, name, description, values}} = msg;
 
     if (
         !device.runningTest ||
@@ -196,7 +196,7 @@ function saveTestData(device: Device, msg: TestResultsMessage) {
             id: device.id,
             userAgent: device.userAgent,
         },
-        sampleData,
+        values,
     });
 
     freeDevice(device);
@@ -238,7 +238,7 @@ function startTest(deviceId: number, url: string) {
         runId,
     };
 
-    const msg: StartTestMessage = {
+    const msg: StartTestAggregatorToDeviceMessage = {
         type: 'startTest',
         data: {
             runId,

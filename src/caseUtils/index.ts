@@ -1,14 +1,13 @@
 import {
-    TestMessage,
+    TestToDeviceMessage,
     Sample,
-    TestEndMessage,
-    TestSampleResultMessage,
-    TestSampleResult,
+    EndTestToDeviceMessage,
+    ResultTestToDeviceMessage,
     TestInfo,
-    TestInfoMessage,
+    InfoTestToDeviceMessage,
 } from './types';
 
-function send(msg: TestMessage): void {
+function send(msg: TestToDeviceMessage): void {
     const opener: Window | null = window.opener;
     if (!opener) {
         return;
@@ -18,47 +17,24 @@ function send(msg: TestMessage): void {
 }
 
 export function info(data: TestInfo): void {
-    const msg: TestInfoMessage = {
+    const msg: InfoTestToDeviceMessage = {
         type: 'testInfo',
         data,
     };
     send(msg);
 }
 
-export function result(data: TestSampleResult): void {
-    const msg: TestSampleResultMessage = {
-        type: 'testSampleResult',
+export function result(data: Sample): void {
+    const msg: ResultTestToDeviceMessage = {
+        type: 'ResultTestToDeviceMessage',
         data,
     };
     send(msg);
 }
 
 export function end(): void {
-    const msg: TestEndMessage = {
+    const msg: EndTestToDeviceMessage = {
         type: 'testEnd',
     };
     send(msg);
-}
-
-export function getMean(sample: Sample): number {
-    let mean = sample[0];
-
-    for (let i = 1; i < sample.length; i++) {
-        mean += sample[i];
-    }
-
-    mean /= sample.length;
-
-    return mean;
-}
-
-export function getDeviation(sample: Sample): number {
-    const mean = getMean(sample);
-    let dispersion = 0;
-
-    for (let i = 0; i < sample.length; i++) {
-        dispersion += Math.pow(sample[i] - mean, 2);
-    }
-
-    return dispersion / sample.length;
 }

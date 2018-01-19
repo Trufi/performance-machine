@@ -1,15 +1,14 @@
 import {
     AboutMessage,
-    StartTestMessage,
-    TestResultsMessage,
-    UnxpectedTestClosingMessage,
-    ToDeviceMessage,
-    FromDeviceMessage,
-    InfoToDeviceMessage,
+    StartTestAggregatorToDeviceMessage,
+    TestResultsDeviceToAggregatorMessage,
+    UnxpectedTestClosingDeviceToAggregatorMessage,
+    AggregatorToDeviceMessage,
+    DeviceToAggregatorMessage,
+    InfoAggregatorToDeviceMessage,
     NameFromDeviceMessage,
-} from '../types';
-import { TestMessage, TestSampleResult } from '../caseUtils/types';
-import { getMean } from '../caseUtils';
+} from '../types/messages';
+import { TestToDeviceMessage } from '../caseUtils/types';
 
 const deviceIdElement = document.getElementById('device-id') as HTMLElement;
 const deviceNameElement = document.getElementById('device-name') as HTMLElement;
@@ -48,7 +47,7 @@ interface Test {
         description: string;
         samplesCount: number;
         currentSample: number;
-        samplesData: TestSampleResult[];
+        values: any;
     };
 }
 
@@ -83,7 +82,7 @@ function connect() {
 connect();
 
 function onAggregatorMessage(ev: MessageEvent) {
-    const msg: ToDeviceMessage = JSON.parse(ev.data);
+    const msg: AggregatorToDeviceMessage = JSON.parse(ev.data);
     console.log('message', msg);
 
     switch (msg.type) {
@@ -94,7 +93,7 @@ function onAggregatorMessage(ev: MessageEvent) {
     }
 }
 
-function sendAggregatorMessage(msg: FromDeviceMessage) {
+function sendAggregatorMessage(msg: DeviceToAggregatorMessage) {
     console.log('send', msg);
     ws.send(JSON.stringify(msg));
 }
@@ -116,7 +115,7 @@ function sendAbout() {
     sendAggregatorMessage(msg);
 }
 
-function setInfo(msg: InfoToDeviceMessage) {
+function setInfo(msg: InfoAggregatorToDeviceMessage) {
     if (!info) {
         const {id, name} = msg.data;
         info = {id};
@@ -141,7 +140,7 @@ function updateInfo() {
     }
 }
 
-function startTest(msg: StartTestMessage) {
+function startTest(msg: StartTestAggregatorToDeviceMessage) {
     const {data: {url, runId}} = msg;
     test = {
         runId,
@@ -182,7 +181,7 @@ function unexpectedTestClosing() {
     closeTestSample();
     test = undefined;
 
-    const msg: UnxpectedTestClosingMessage = {
+    const msg: UnxpectedTestClosingDeviceToAggregatorMessage = {
         type: 'unexpectedTestClosing',
     };
 
@@ -207,7 +206,7 @@ function onTestMessage(ev: MessageEvent) {
         return;
     }
 
-    const msg: TestMessage = JSON.parse(ev.data);
+    const msg: TestToDeviceMessage = JSON.parse(ev.data);
 
     switch (msg.type) {
         case 'testInfo': {
@@ -218,16 +217,16 @@ function onTestMessage(ev: MessageEvent) {
                     description,
                     samplesCount,
                     currentSample: 0,
-                    samplesData: [],
+                    values: [],
                 };
             }
             break;
         }
 
-        case 'testSampleResult': {
+        case 'ResultTestToDeviceMessage': {
             const {data} = test;
             if (data) {
-                data.samplesData.push(msg.data);
+                data.values.push(msg.data);
             }
             break;
         }
@@ -255,21 +254,15 @@ function sendTestResults() {
         return;
     }
 
-    const {runId, data: {name, description, samplesData}} = test;
+    const {runId, data: {name, description, values}} = test;
 
-    const mean = getMean(samplesData.map((data) => data.mean));
-    const deviation = getMean(samplesData.map((data) => data.deviation));
-
-    const msg: TestResultsMessage = {
+    const msg: TestResultsDeviceToAggregatorMessage = {
         type: 'testResults',
         data: {
             runId,
             name,
             description,
-            sampleData: {
-                mean,
-                deviation,
-            },
+            values,
         },
     };
 

@@ -1,5 +1,4 @@
 import * as ws from 'ws';
-import { TestSampleResult } from '../caseUtils/types';
 
 export interface Viewer {
     id: number;
@@ -29,7 +28,7 @@ export interface TestData {
             id: number;
             userAgent: string;
         };
-        sampleData: TestSampleResult;
+        values: any;
     }>;
 }
 

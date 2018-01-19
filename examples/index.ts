@@ -1,5 +1,4 @@
 import { info, result, end } from '../src/caseUtils';
-import { getMean, getDeviation } from '../src/caseUtils/index';
 
 info({
     name: 'Object iteration',
@@ -30,10 +29,11 @@ for (let i = 0; i < 10000; i++) {
     object[randomKey()] = Math.round(random() * 1e5);
 }
 
+const sampleLength = 100;
 const sample = [];
 let i = 0;
 
-for (let j = 0; j < 100; j++) {
+for (let j = 0; j < sampleLength; j++) {
     const startTime = performance.now();
 
     i = 0;
@@ -47,8 +47,8 @@ for (let j = 0; j < 100; j++) {
 console.log(i);
 
 result({
-    mean: getMean(sample),
-    deviation: getDeviation(sample),
+    name: 'ms',
+    values: sample,
 });
 
 end();

@@ -12,8 +12,7 @@ const Test = ({data}: {data: TestData}) => {
                     <ul>
                         <li>Date: {new Date(res.date).toString()}</li>
                         <li>DeviceId: {res.device.id}</li>
-                        <li>Mean: {res.sampleData.mean.toFixed(3)}</li>
-                        <li>Deviation: {res.sampleData.deviation.toFixed(3)}</li>
+                        <li>Values: {JSON.stringify(res.values)}</li>
                     </ul>
                 </li>)}
             </ul>

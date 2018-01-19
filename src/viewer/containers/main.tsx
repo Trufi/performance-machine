@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FromViewerMessage, StartTestFromViewerMessage, AggregatorData } from '../../types';
+import { FromViewerMessage, StartTestFromViewerMessage, AggregatorData } from '../../types/messages';
 import { DeviceList } from './deviceList';
 import { TestList } from './testList';
 

@@ -1,5 +1,4 @@
-import { TestsData } from './server/types';
-import { TestSampleResult } from './caseUtils/types';
+import { TestsData } from '../server/types';
 
 export interface AboutMessage {
     type: 'about';
@@ -11,7 +10,7 @@ export interface AboutMessage {
     };
 }
 
-export interface StartTestMessage {
+export interface StartTestAggregatorToDeviceMessage {
     type: 'startTest';
     data: {
         runId: number;
@@ -19,17 +18,17 @@ export interface StartTestMessage {
     };
 }
 
-export interface TestResultsMessage {
+export interface TestResultsDeviceToAggregatorMessage {
     type: 'testResults';
     data: {
         runId: number;
         name: string;
         description: string;
-        sampleData: TestSampleResult;
+        values: any;
     };
 }
 
-export interface UnxpectedTestClosingMessage {
+export interface UnxpectedTestClosingDeviceToAggregatorMessage {
     type: 'unexpectedTestClosing';
 }
 
@@ -61,7 +60,7 @@ export interface AggregatorDataMessage {
     data: AggregatorData;
 }
 
-export interface InfoToDeviceMessage {
+export interface InfoAggregatorToDeviceMessage {
     type: 'info';
     data: {
         id: number;
@@ -84,20 +83,20 @@ export type FromViewerMessage
     = AboutMessage
     | StartTestFromViewerMessage;
 
-export type ToDeviceMessage
-    = StartTestMessage
-    | InfoToDeviceMessage;
+export type AggregatorToDeviceMessage
+    = StartTestAggregatorToDeviceMessage
+    | InfoAggregatorToDeviceMessage;
 
-export type FromDeviceMessage
+export type DeviceToAggregatorMessage
     = AboutMessage
-    | TestResultsMessage
+    | TestResultsDeviceToAggregatorMessage
     | NameFromDeviceMessage
-    | UnxpectedTestClosingMessage;
+    | UnxpectedTestClosingDeviceToAggregatorMessage;
 
 export type Message
     = ToViewerMessage
     | FromViewerMessage
-    | ToDeviceMessage
-    | FromDeviceMessage;
+    | AggregatorToDeviceMessage
+    | DeviceToAggregatorMessage;
 
 export type MessageType = Message['type'];

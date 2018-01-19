@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { render } from 'react-dom';
 import { Main } from './containers/main';
-import { FromViewerMessage, AboutMessage, AggregatorData, ToViewerMessage } from '../types';
+import { FromViewerMessage, AboutMessage, AggregatorData, ToViewerMessage } from '../types/messages';
 
 const main = render(
     <Main sendMessage={sendMessage}/>,
