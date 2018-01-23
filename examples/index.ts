@@ -3,7 +3,6 @@ import { info, result, end } from '../src/caseUtils';
 info({
     name: 'Object iteration',
     description: '',
-    samplesCount: 5,
 });
 
 const random = (() => {

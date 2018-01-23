@@ -1,4 +1,9 @@
-import { Sample, TestInfo } from '../types/tests';
+import { Sample } from '../types/tests';
+
+export interface TestInfo {
+    name: string;
+    description: string;
+}
 
 export interface InfoTestToDeviceMessage {
     type: 'testInfo';
@@ -7,7 +12,9 @@ export interface InfoTestToDeviceMessage {
 
 export interface ResultTestToDeviceMessage {
     type: 'ResultTestToDeviceMessage';
-    data: Sample;
+    data: {
+        values: Sample;
+    };
 }
 
 export interface EndTestToDeviceMessage {

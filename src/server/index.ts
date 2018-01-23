@@ -10,9 +10,10 @@ import {
     StartTestAggregatorToDeviceMessage,
     DeviceToAggregatorMessage,
     InfoAggregatorToDeviceMessage,
+    NewTestFromViewerMessage,
 } from '../types/messages';
 import { Viewer, Device } from './types';
-import { saveTestResult, getTestInfo, getTestsInfo } from './store';
+import * as store from './store';
 
 const log = (msg: string | undefined) => console.log(msg);
 
@@ -162,9 +163,17 @@ function viewerOnMessage(_viewer: Viewer, msg: FromViewerMessage) {
     console.log('viewer', msg);
 
     switch (msg.type) {
+        case 'newTest':
+            return newTest(msg);
         case 'startTest':
             return startTest(msg.data.deviceId, msg.data.testId);
     }
+}
+
+function newTest(msg: NewTestFromViewerMessage) {
+    const {data: {url}} = msg;
+    store.createNewTest(url);
+    sendDataToViewers();
 }
 
 function onTestResultMsg(device: Device, msg: TestResultsDeviceToAggregatorMessage) {
@@ -176,7 +185,7 @@ function onTestResultMsg(device: Device, msg: TestResultsDeviceToAggregatorMessa
     }
 
     const {runningTest: {testId}} = device;
-    saveTestResult(testId, device.id, msg.data);
+    store.saveTestResult(testId, device.id, msg.data);
     freeDevice(device);
     sendDataToViewers();
 }
@@ -191,7 +200,7 @@ function getAggregatorDataMessage(): AggregatorDataMessage {
         type: 'aggregatorData',
         data: {
             devices: devices.map(({name, id, userAgent, runningTest}) => ({name, id, userAgent, runningTest})),
-            testsInfo: getTestsInfo(),
+            testsInfo: store.getTestsInfo(),
         },
     };
 }
@@ -220,7 +229,7 @@ function startTest(deviceId: number, testId: number) {
         type: 'startTest',
         data: {
             runId,
-            url: getTestInfo(testId).url,
+            url: store.getTestData(testId).url,
         },
     };
 

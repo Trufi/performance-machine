@@ -8,7 +8,10 @@ import {
     InfoAggregatorToDeviceMessage,
     NameFromDeviceMessage,
 } from '../types/messages';
-import { TestToDeviceMessage } from '../caseUtils/types';
+import { TestToDeviceMessage, TestInfo } from '../caseUtils/types';
+import { Sample } from '../types/tests';
+
+const SAMPLES_COUNT = 3;
 
 const deviceIdElement = document.getElementById('device-id') as HTMLElement;
 const deviceNameElement = document.getElementById('device-name') as HTMLElement;
@@ -38,20 +41,16 @@ namePickButtonElement.addEventListener('click', () => {
 interface Test {
     runId: number;
     url: string;
-    sample?: {
+    currentCycleNumber: number;
+    currentCycle?: {
         window: Window;
         closeCheckInterval: NodeJS.Timer;
     };
-    data?: {
-        name: string;
-        description: string;
-        samplesCount: number;
-        currentSample: number;
-        values: any;
-    };
+    results: Sample[];
+    info?: TestInfo;
 }
 
-interface Info {
+interface DeviceStorageInfo {
     name?: string;
     id: number;
 }
@@ -145,6 +144,8 @@ function startTest(msg: StartTestAggregatorToDeviceMessage) {
     test = {
         runId,
         url,
+        currentCycleNumber: 0,
+        results: [],
     };
 
     startTestSample();
@@ -163,7 +164,7 @@ function startTestSample() {
 
     const closeCheckInterval = setInterval(checkMaybeTestClosed, 1000);
 
-    test.sample = {
+    test.currentCycle = {
         window: openedWindow,
         closeCheckInterval,
     };
@@ -172,7 +173,7 @@ function startTestSample() {
 }
 
 function checkMaybeTestClosed() {
-    if (test && test.sample && test.sample.window.closed) {
+    if (test && test.currentCycle && test.currentCycle.window.closed) {
         unexpectedTestClosing();
     }
 }
@@ -189,19 +190,20 @@ function unexpectedTestClosing() {
 }
 
 function closeTestSample() {
-    if (!test || !test.sample) {
+    if (!test || !test.currentCycle) {
         return;
     }
 
-    if (test.sample.window.removeEventListener) {
-        test.sample.window.removeEventListener('message', onTestMessage);
+    if (test.currentCycle.window.removeEventListener) {
+        test.currentCycle.window.removeEventListener('message', onTestMessage);
     }
-    test.sample.window.close();
-    clearInterval(test.sample.closeCheckInterval);
+    test.currentCycle.window.close();
+    clearInterval(test.currentCycle.closeCheckInterval);
 }
 
 function onTestMessage(ev: MessageEvent) {
     console.log(ev);
+
     if (!test) {
         return;
     }
@@ -210,35 +212,30 @@ function onTestMessage(ev: MessageEvent) {
 
     switch (msg.type) {
         case 'testInfo': {
-            const {name, description, samplesCount} = msg.data;
-            if (!test.data) {
-                test.data = {
+            const {name, description} = msg.data;
+            if (!test.info) {
+                test.info = {
                     name,
                     description,
-                    samplesCount,
-                    currentSample: 0,
-                    values: [],
                 };
             }
             break;
         }
 
         case 'ResultTestToDeviceMessage': {
-            const {data} = test;
-            if (data) {
-                data.values.push(msg.data);
-            }
+            const {results} = test;
+            results.push(msg.data.values);
             break;
         }
 
         case 'testEnd': {
-            const {data} = test;
-            if (data) {
+            const {currentCycle} = test;
+            if (currentCycle) {
                 closeTestSample();
 
-                data.currentSample++;
+                test.currentCycleNumber++;
 
-                if (data.currentSample >= data.samplesCount) {
+                if (test.currentCycleNumber >= SAMPLES_COUNT) {
                     sendTestResults();
                 } else {
                     startTestSample();
@@ -250,19 +247,18 @@ function onTestMessage(ev: MessageEvent) {
 }
 
 function sendTestResults() {
-    if (!test || !test.data) {
+    if (!test || !test.currentCycle) {
         return;
     }
 
-    const {runId, data: {name, description, values}} = test;
+    const {runId, results, info} = test;
 
     const msg: TestResultsDeviceToAggregatorMessage = {
         type: 'testResults',
         data: {
             runId,
-            name,
-            description,
-            values,
+            values: results,
+            info,
         },
     };
 
@@ -271,10 +267,10 @@ function sendTestResults() {
     test = undefined;
 }
 
-function getInfoFromStorage(): Info | undefined {
+function getInfoFromStorage(): DeviceStorageInfo | undefined {
     const str = localStorage.getItem('info');
     if (str) {
-        return JSON.parse(str) as Info;
+        return JSON.parse(str) as DeviceStorageInfo;
     }
 }
 

@@ -1,4 +1,5 @@
-import { Sample, TestInfo } from '../types/tests';
+import { Sample } from '../types/tests';
+import { TestInfo } from './types';
 import {
     TestToDeviceMessage,
     EndTestToDeviceMessage,
@@ -26,7 +27,9 @@ export function info(data: TestInfo): void {
 export function result(data: Sample): void {
     const msg: ResultTestToDeviceMessage = {
         type: 'ResultTestToDeviceMessage',
-        data,
+        data: {
+            values: data,
+        },
     };
     send(msg);
 }

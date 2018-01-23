@@ -1,4 +1,4 @@
-import { TestResult, TestInfo, Sample } from '../types/tests';
+import { TestResult, ClientTestInfo, Sample } from '../types/tests';
 
 interface StoredTestResult {
     date: number;
@@ -7,7 +7,10 @@ interface StoredTestResult {
 }
 
 interface StoredTestData {
-    info: TestInfo;
+    id: number;
+    url: string;
+    name: string;
+    description?: string;
     results: StoredTestResult[];
 }
 
@@ -15,10 +18,12 @@ let idCounter = 0;
 
 const testsData: {[id: number]: StoredTestData} = {};
 
-export function createNewTest(info: TestInfo) {
+export function createNewTest(url: string) {
     const id = idCounter++;
     testsData[id] = {
-        info,
+        id,
+        url,
+        name: url,
         results: [],
     };
 }
@@ -31,28 +36,31 @@ export function saveTestResult(testId: number, deviceId: number, result: TestRes
         return;
     }
 
+    const {values, info} = result;
+
     const resultToStore: StoredTestResult = {
         date: Date.now(),
         deviceId,
-        values: result.values,
+        values,
     };
 
     testData.results.push(resultToStore);
-}
 
-export function getTestInfo(testId: number): TestInfo {
-    return testsData[testId].info;
+    if (info) {
+        testData.name = info.name;
+        testData.description = info.description;
+    }
 }
 
 export function getTestData(testId: number): StoredTestData {
     return testsData[testId];
 }
 
-export function getTestsInfo(): TestInfo[] {
-    const res: TestInfo[] = [];
+export function getTestsInfo(): ClientTestInfo[] {
+    const res: ClientTestInfo[] = [];
     for (const key in testsData) {
-        const testData = testsData[key];
-        res.push(testData.info);
+        const {id, name, description, url} = testsData[key];
+        res.push({id, name, description, url});
     }
     return res;
 }

@@ -1,26 +1,15 @@
 import * as React from 'react';
-import { TestsData, TestData } from '../../server/types';
+import { ClientTestInfo } from '../../types/tests';
 
-const Test = ({data}: {data: TestData}) => {
+const Test = ({data}: {data: ClientTestInfo}) => {
     return <ul>
         <li>Name: {data.name}</li>
         <li>URL: {data.url}</li>
-        <li>Description: {data.description}</li>
-        <li>Result:
-            <ul>
-                {data.results.map((res, i) => <li key={i}>
-                    <ul>
-                        <li>Date: {new Date(res.date).toString()}</li>
-                        <li>DeviceId: {res.device.id}</li>
-                        <li>Values: {JSON.stringify(res.values)}</li>
-                    </ul>
-                </li>)}
-            </ul>
-        </li>
+        {data.description && <li>Description: {data.description}</li>}
     </ul>;
 };
 
-export const TestList = ({data}: {data: TestsData}) => {
+export const TestList = ({data}: {data: ClientTestInfo[]}) => {
     const elements = [];
     for (const url in data) {
         const test = data[url];
