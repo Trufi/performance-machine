@@ -11,27 +11,8 @@ export interface Device {
     ws: ws;
     userAgent: string;
     runningTest?: {
+        testId: number;
         runId: number;
-        name?: string;
-        url: string;
         startTime: number;
     };
-}
-
-export interface TestData {
-    url: string;
-    name: string;
-    description: string;
-    results: Array<{
-        date: number;
-        device: {
-            id: number;
-            userAgent: string;
-        };
-        values: any;
-    }>;
-}
-
-export interface TestsData {
-    [url: string]: TestData;
 }

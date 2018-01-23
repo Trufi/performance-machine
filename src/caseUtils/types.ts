@@ -1,17 +1,8 @@
-export interface TestInfo {
-    name: string;
-    description: string;
-    samplesCount: number;
-}
+import { Sample, TestInfo } from '../types/tests';
 
 export interface InfoTestToDeviceMessage {
     type: 'testInfo';
     data: TestInfo;
-}
-
-export interface Sample {
-    name: string;
-    values: number[];
 }
 
 export interface ResultTestToDeviceMessage {

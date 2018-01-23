@@ -1,4 +1,4 @@
-import { TestsData } from '../server/types';
+import { TestResult, TestInfo } from './tests';
 
 export interface AboutMessage {
     type: 'about';
@@ -20,12 +20,7 @@ export interface StartTestAggregatorToDeviceMessage {
 
 export interface TestResultsDeviceToAggregatorMessage {
     type: 'testResults';
-    data: {
-        runId: number;
-        name: string;
-        description: string;
-        values: any;
-    };
+    data: TestResult;
 }
 
 export interface UnxpectedTestClosingDeviceToAggregatorMessage {
@@ -44,15 +39,14 @@ export interface AggregatorDeviceData {
     id: number;
     userAgent: string;
     runningTest?: {
-        url: string;
-        name?: string;
+        testId: number;
         startTime: number;
     };
 }
 
 export interface AggregatorData {
     devices: AggregatorDeviceData[];
-    testsData: TestsData;
+    testsInfo: TestInfo[];
 }
 
 export interface AggregatorDataMessage {
@@ -72,7 +66,7 @@ export interface StartTestFromViewerMessage {
     type: 'startTest';
     data: {
         deviceId: number;
-        url: string;
+        testId: number;
     };
 }
 

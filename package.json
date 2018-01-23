@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "express": "^4.16.2",
+    "graylog2": "0.1.2",
     "ts-node": "^3.3.0",
     "tslib": "^1.8.0",
     "typescript": "^2.6.1",

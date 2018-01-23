@@ -11,7 +11,8 @@ import {
     DeviceToAggregatorMessage,
     InfoAggregatorToDeviceMessage,
 } from '../types/messages';
-import { Viewer, Device, TestsData } from './types';
+import { Viewer, Device } from './types';
+import { saveTestResult, getTestInfo, getTestsInfo } from './store';
 
 const log = (msg: string | undefined) => console.log(msg);
 
@@ -22,8 +23,6 @@ const server = app.listen(port, () => log(`Server listen on ${port} port`));
 app.use(express.static(path.join(__dirname, '../../dist')));
 
 const wsServer = new ws.Server({server});
-
-const testsData: TestsData = {};
 
 let testRunIdCounter = 0;
 
@@ -151,7 +150,7 @@ function deviceOnMessage(device: Device, msg: DeviceToAggregatorMessage) {
 
     switch (msg.type) {
         case 'testResults':
-            return saveTestData(device, msg);
+            return onTestResultMsg(device, msg);
         case 'unexpectedTestClosing':
             return freeDevice(device);
         case 'name':
@@ -164,41 +163,20 @@ function viewerOnMessage(_viewer: Viewer, msg: FromViewerMessage) {
 
     switch (msg.type) {
         case 'startTest':
-            return startTest(msg.data.deviceId, msg.data.url);
+            return startTest(msg.data.deviceId, msg.data.testId);
     }
 }
 
-function saveTestData(device: Device, msg: TestResultsDeviceToAggregatorMessage) {
-    const {data: {runId, name, description, values}} = msg;
-
+function onTestResultMsg(device: Device, msg: TestResultsDeviceToAggregatorMessage) {
     if (
         !device.runningTest ||
-        device.runningTest.runId !== runId
+        device.runningTest.runId !== msg.data.runId
     ) {
         return;
     }
 
-    const {runningTest: {url}} = device;
-
-    if (!testsData[url]) {
-        testsData[url] = {
-            url,
-            name,
-            description,
-            results: [],
-        };
-    }
-
-    const testData = testsData[url];
-    testData.results.push({
-        date: Date.now(),
-        device: {
-            id: device.id,
-            userAgent: device.userAgent,
-        },
-        values,
-    });
-
+    const {runningTest: {testId}} = device;
+    saveTestResult(testId, device.id, msg.data);
     freeDevice(device);
     sendDataToViewers();
 }
@@ -213,7 +191,7 @@ function getAggregatorDataMessage(): AggregatorDataMessage {
         type: 'aggregatorData',
         data: {
             devices: devices.map(({name, id, userAgent, runningTest}) => ({name, id, userAgent, runningTest})),
-            testsData,
+            testsInfo: getTestsInfo(),
         },
     };
 }
@@ -223,7 +201,7 @@ function sendDataToViewers() {
     viewers.forEach((viewer) => sendMessage(viewer.ws, msg));
 }
 
-function startTest(deviceId: number, url: string) {
+function startTest(deviceId: number, testId: number) {
     const device = devices.find((el) => el.id === deviceId);
 
     if (!device || device.runningTest) {
@@ -234,15 +212,15 @@ function startTest(deviceId: number, url: string) {
 
     device.runningTest = {
         startTime: Date.now(),
-        url,
         runId,
+        testId,
     };
 
     const msg: StartTestAggregatorToDeviceMessage = {
         type: 'startTest',
         data: {
             runId,
-            url,
+            url: getTestInfo(testId).url,
         },
     };
 

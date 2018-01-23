@@ -1,9 +1,8 @@
+import { Sample, TestInfo } from '../types/tests';
 import {
     TestToDeviceMessage,
-    Sample,
     EndTestToDeviceMessage,
     ResultTestToDeviceMessage,
-    TestInfo,
     InfoTestToDeviceMessage,
 } from './types';
 
