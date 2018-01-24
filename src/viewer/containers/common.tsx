@@ -2,7 +2,7 @@ import * as React from 'react';
 import { AggregatorData, FromViewerMessage } from '../../types/messages';
 import { DeviceList } from './deviceList';
 import { TestList } from './testList';
-import { startTest } from '../api';
+import * as api from '../api';
 
 interface CommonProps {
     sendMessage: (msg: FromViewerMessage) => void;
@@ -27,7 +27,7 @@ export class Common extends React.Component<CommonProps, {}> {
 
         let testsHtml = <div>No tests</div>;
         if (aggregatorData && aggregatorData.testsInfo.length) {
-            testsHtml = <TestList data={aggregatorData.testsInfo}/>;
+            testsHtml = <TestList data={aggregatorData.testsInfo} deleteCallback={this.deleteTest}/>;
         }
 
         let startTestHtml;
@@ -64,12 +64,23 @@ export class Common extends React.Component<CommonProps, {}> {
 
     private buttonOnClick = () => {
         try {
-            startTest(
+            api.startTest(
                 Number(this.selectTestElement.value),
                 Number(this.selectDeviceElement.value),
             );
         } catch (err) {
             console.log(err, err.response);
+        }
+    }
+
+    private deleteTest = (testId: number) => {
+        const result = confirm(`Do you want to delete test with id: ${testId}?`);
+        if (result) {
+            try {
+                api.deleteTest(testId);
+            } catch (err) {
+                console.log(err, err.response);
+            }
         }
     }
 }

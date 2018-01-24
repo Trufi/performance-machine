@@ -13,3 +13,7 @@ export async function createNewTest(url: string) {
 export async function startTest(testId: number, deviceId: number) {
     return instance.get(`start/test/${testId}/device/${deviceId}`);
 }
+
+export async function deleteTest(testId: number) {
+    return instance.delete(`test/${testId}`);
+}

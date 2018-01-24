@@ -29,6 +29,10 @@ export function createNewTest(url: string): number {
     return id;
 }
 
+export function deleteTest(id: number) {
+    delete testsData[id];
+}
+
 export function saveTestResult(testId: number, deviceId: number, result: TestResult) {
     const testData = testsData[testId];
 

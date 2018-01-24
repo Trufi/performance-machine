@@ -233,7 +233,7 @@ function startTest(deviceId: number, testId: number) {
 app.use('/api', bodyParser.json());
 
 app.get('/api/start/test/:testId/device/:deviceId', (req, res) => {
-    log(`/api/start/test, testId: ${req.params.testId}, deviceId: ${req.params.deviceId}`);
+    log(`get /api/start/test, testId: ${req.params.testId}, deviceId: ${req.params.deviceId}`);
 
     const testId = Number(req.params.testId);
     const deviceId = Number(req.params.deviceId);
@@ -251,7 +251,7 @@ app.get('/api/start/test/:testId/device/:deviceId', (req, res) => {
 });
 
 app.post('/api/test', (req, res) => {
-    log(`/api/test, url: ${req.body.url}`);
+    log(`post /api/test, url: ${req.body.url}`);
 
     if (typeof req.body.url !== 'string' || req.body.url.length === 0) {
         return res.status(400).send();
@@ -261,6 +261,19 @@ app.post('/api/test', (req, res) => {
     const id = store.createNewTest(body.url);
     const response: CreateNewTestResponse = {id};
     res.json(response);
+
+    sendDataToViewers();
+});
+
+app.delete('/api/test/:testId', (req, res) => {
+    log(`delete /api/test, id: ${req.params.testId}`);
+
+    const testId = Number(req.params.testId);
+    if (isNaN(testId)) {
+        return res.status(400).send('TestId not a number');
+    }
+
+    store.deleteTest(testId);
 
     sendDataToViewers();
 });
