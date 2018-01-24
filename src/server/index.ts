@@ -1,3 +1,4 @@
+import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as path from 'path';
 import * as ws from 'ws';
@@ -10,10 +11,10 @@ import {
     StartTestAggregatorToDeviceMessage,
     DeviceToAggregatorMessage,
     InfoAggregatorToDeviceMessage,
-    NewTestFromViewerMessage,
 } from '../types/messages';
 import { Viewer, Device } from './types';
 import * as store from './store';
+import { CreateNewTestResponse, CreateNewTestRequest } from '../types/api';
 
 const log = (msg: string | undefined) => console.log(msg);
 
@@ -161,19 +162,6 @@ function deviceOnMessage(device: Device, msg: DeviceToAggregatorMessage) {
 
 function viewerOnMessage(_viewer: Viewer, msg: FromViewerMessage) {
     console.log('viewer', msg);
-
-    switch (msg.type) {
-        case 'newTest':
-            return newTest(msg);
-        case 'startTest':
-            return startTest(msg.data.deviceId, msg.data.testId);
-    }
-}
-
-function newTest(msg: NewTestFromViewerMessage) {
-    const {data: {url}} = msg;
-    store.createNewTest(url);
-    sendDataToViewers();
 }
 
 function onTestResultMsg(device: Device, msg: TestResultsDeviceToAggregatorMessage) {
@@ -214,7 +202,12 @@ function startTest(deviceId: number, testId: number) {
     const device = devices.find((el) => el.id === deviceId);
 
     if (!device || device.runningTest) {
-        return;
+        return `Device with id: ${deviceId} not found`;
+    }
+
+    const testData = store.getTestData(testId);
+    if (!testData) {
+        return `Test with id: ${testId} not found`;
     }
 
     const runId = testRunIdCounter++;
@@ -236,6 +229,41 @@ function startTest(deviceId: number, testId: number) {
     sendMessage(device.ws, msg);
     sendDataToViewers();
 }
+
+app.use('/api', bodyParser.json());
+
+app.get('/api/start/test/:testId/device/:deviceId', (req, res) => {
+    log(`/api/start/test, testId: ${req.params.testId}, deviceId: ${req.params.deviceId}`);
+
+    const testId = Number(req.params.testId);
+    const deviceId = Number(req.params.deviceId);
+
+    if (isNaN(testId) || isNaN(deviceId)) {
+        return res.status(400).send('DeviceId or testId not a number');
+    }
+
+    const err = startTest(deviceId, testId);
+    if (err) {
+        return res.status(400).send(err);
+    }
+
+    res.send('OK');
+});
+
+app.post('/api/test', (req, res) => {
+    log(`/api/test, url: ${req.body.url}`);
+
+    if (typeof req.body.url !== 'string' || req.body.url.length === 0) {
+        return res.status(400).send();
+    }
+
+    const body: CreateNewTestRequest = req.body;
+    const id = store.createNewTest(body.url);
+    const response: CreateNewTestResponse = {id};
+    res.json(response);
+
+    sendDataToViewers();
+});
 
 // error handlers
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

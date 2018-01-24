@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { StartTestFromViewerMessage, AggregatorData, FromViewerMessage } from '../../types/messages';
+import { AggregatorData, FromViewerMessage } from '../../types/messages';
 import { DeviceList } from './deviceList';
 import { TestList } from './testList';
+import { startTest } from '../api';
 
 interface CommonProps {
     sendMessage: (msg: FromViewerMessage) => void;
@@ -24,7 +25,7 @@ export class Common extends React.Component<CommonProps, {}> {
             </div>;
         }
 
-        let testsHtml = <div>No test results</div>;
+        let testsHtml = <div>No tests</div>;
         if (aggregatorData && aggregatorData.testsInfo.length) {
             testsHtml = <TestList data={aggregatorData.testsInfo}/>;
         }
@@ -62,14 +63,13 @@ export class Common extends React.Component<CommonProps, {}> {
     }
 
     private buttonOnClick = () => {
-        const msg: StartTestFromViewerMessage = {
-            type: 'startTest',
-            data: {
-                deviceId: Number(this.selectDeviceElement.value),
-                testId: Number(this.selectTestElement.value),
-            },
-        };
-
-        this.props.sendMessage(msg);
+        try {
+            startTest(
+                Number(this.selectTestElement.value),
+                Number(this.selectDeviceElement.value),
+            );
+        } catch (err) {
+            console.log(err, err.response);
+        }
     }
 }

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FromViewerMessage, NewTestFromViewerMessage } from '../../types/messages';
+import { FromViewerMessage } from '../../types/messages';
+import { createNewTest } from '../api';
 
 interface NewTestProps {
     sendMessage: (msg: FromViewerMessage) => void;
@@ -35,20 +36,17 @@ export class NewTest extends React.Component<NewTestProps & RouteComponentProps<
         }
     }
 
-    private buttonOnClick = () => {
+    private buttonOnClick = async () => {
         const value = this.inputElement.value;
         if (value.length === 0) {
             return;
         }
 
-        const msg: NewTestFromViewerMessage = {
-            type: 'newTest',
-            data: {
-                url: this.inputElement.value,
-            },
-        };
-
-        this.props.sendMessage(msg);
-        this.props.history.push('/');
+        try {
+            await createNewTest(value);
+            this.props.history.push('/');
+        } catch (err) {
+            console.log(err, err.response);
+        }
     }
 }

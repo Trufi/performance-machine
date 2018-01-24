@@ -62,28 +62,11 @@ export interface InfoAggregatorToDeviceMessage {
     };
 }
 
-export interface StartTestFromViewerMessage {
-    type: 'startTest';
-    data: {
-        deviceId: number;
-        testId: number;
-    };
-}
-
-export interface NewTestFromViewerMessage {
-    type: 'newTest';
-    data: {
-        url: string;
-    };
-}
-
 export type ToViewerMessage
     = AggregatorDataMessage;
 
 export type FromViewerMessage
-    = AboutMessage
-    | StartTestFromViewerMessage
-    | NewTestFromViewerMessage;
+    = AboutMessage;
 
 export type AggregatorToDeviceMessage
     = StartTestAggregatorToDeviceMessage

@@ -18,7 +18,7 @@ let idCounter = 0;
 
 const testsData: {[id: number]: StoredTestData} = {};
 
-export function createNewTest(url: string) {
+export function createNewTest(url: string): number {
     const id = idCounter++;
     testsData[id] = {
         id,
@@ -26,6 +26,7 @@ export function createNewTest(url: string) {
         name: url,
         results: [],
     };
+    return id;
 }
 
 export function saveTestResult(testId: number, deviceId: number, result: TestResult) {
