@@ -3,36 +3,65 @@ import * as api from '../api';
 import { RouteComponentProps } from 'react-router-dom';
 import { GetAllTestDataResponse } from '../../types/api';
 import { StoredTestResult } from '../../server/store';
-import { Sample } from '../../types/tests';
+import {
+    LineChart,
+    Line,
+    YAxis,
+    Tooltip,
+} from 'recharts';
 
-interface SampleDrawerProps {
-    sample: Sample;
-}
+const randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);
 
-class SampleDrawer extends React.Component<SampleDrawerProps, {}> {
-    public render() {
-        return <div>{JSON.stringify(this.props.sample)}</div>;
-    }
-}
+const TestResult = ({result}: {result: StoredTestResult}) => {
+    const data: any = [];
+    const counters: {[name: string]: number} = {};
+    const dataProperties: string[] = [];
 
-const TestResult = ({result}: {result: StoredTestResult}) => <div>
-    <h2>{result.date}</h2>
-    <ul>
-        <li>DeviceId: {result.deviceId}</li>
-        <li>Sampled:
-            <ul>
-                {result.sampledValues.map((sampled, i) => <li key={i}>
-                    <ul>
-                        <li>Name: {sampled.name}</li>
-                        <li>Mean: {sampled.mean.toFixed(3)}</li>
-                        <li>Deviation: {sampled.deviation.toFixed(3)}</li>
-                    </ul>
-                </li>)}
-            </ul>
-        </li>
-    </ul>
-    {result.values.map((sample, i) => <SampleDrawer key={i} sample={sample}/>)}
-</div>;
+    result.values.forEach((sample) => {
+        const {name, values} = sample;
+
+        if (!counters[name]) {
+            counters[name] = 0;
+        }
+
+        const dataName = name + ' ' + counters[name]++;
+        dataProperties.push(dataName);
+
+        values.forEach((x, i) => {
+            if (data[i] === undefined) {
+                data[i] = {
+                    i,
+                };
+            }
+            data[i][dataName] = Math.round(x * 1e3) / 1e3;
+        });
+    });
+
+    return <div>
+        <h2>{result.date}</h2>
+        <ul>
+            <li>DeviceId: {result.deviceId}</li>
+            <li>Sampled:
+                <ul>
+                    {result.sampledValues.map((sampled, i) => <li key={i}>
+                        <ul>
+                            <li>Name: {sampled.name}</li>
+                            <li>Mean: {sampled.mean.toFixed(3)}</li>
+                            <li>Deviation: {sampled.deviation.toFixed(3)}</li>
+                        </ul>
+                    </li>)}
+                </ul>
+            </li>
+        </ul>
+        <LineChart width={730} height={250} data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <YAxis/>
+            <Tooltip/>
+            {dataProperties.map((property) =>
+                <Line key={property} type='monotone' dataKey={property}
+                    stroke={randomColor()} dot={false}/>)}
+        </LineChart>
+    </div>;
+};
 
 interface InitialState {
     status: 'initial';
