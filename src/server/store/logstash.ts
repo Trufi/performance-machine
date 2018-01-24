@@ -1,5 +1,5 @@
-import { TestData } from './types';
 import * as graylog2 from 'graylog2';
+import * as store from './index';
 
 const logger = new graylog2.graylog({
     servers: [{
@@ -16,21 +16,24 @@ logger.on('error', (error: any) => {
 });
 
 function log(obj: object) {
-    const msgObj = Object.assign({}, obj, {
+    const msgObj = {
+        ...obj,
         team: 'webmaps',
         project: 'performance_test',
-    });
+    };
     logger.log('size', msgObj);
+    console.log('logstash log', msgObj);
 }
 
-export function sendToLogstash(data: TestData) {
-    const {name, url, description, results} = data;
+export async function addTestResult(testId: number, result: store.StoredTestResult) {
+    const info = store.getTestData(testId);
 
-    results.forEach((result) => {
-        const {device} = result;
-
+    result.sampledValues.forEach((sampledValues) => {
         const msg = {
-
-        }
+            test: info,
+            deviceId: result.deviceId,
+            result: sampledValues,
+        };
+        log(msg);
     });
 }

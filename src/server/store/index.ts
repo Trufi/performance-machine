@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { StoredTestData, StoredTestResult } from './index';
 import * as local from './local';
+import * as logstash from './logstash';
 import { getMean, getDeviation } from '../../utils';
 
 interface SampledValues {
@@ -78,6 +79,7 @@ export function saveTestResult(testId: number, deviceId: number, result: TestRes
     };
 
     local.addTestResult(testId, resultToStore);
+    logstash.addTestResult(testId, resultToStore);
 
     if (info) {
         testData.name = info.name;
