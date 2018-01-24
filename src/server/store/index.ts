@@ -3,10 +3,18 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { StoredTestData, StoredTestResult } from './index';
 import * as local from './local';
+import { getMean, getDeviation } from '../../utils';
+
+interface SampledValues {
+    name: string;
+    mean: number;
+    deviation: number;
+}
 
 export interface StoredTestResult {
-    date: number;
+    date: string;
     deviceId: number;
+    sampledValues: SampledValues[];
     values: Sample[];
 }
 
@@ -48,6 +56,7 @@ export function createNewTest(url: string): number {
 
 export function deleteTest(id: number) {
     delete testList[id];
+    local.deleteAllTestResults(id);
     saveTestList();
 }
 
@@ -62,8 +71,9 @@ export function saveTestResult(testId: number, deviceId: number, result: TestRes
     const {values, info} = result;
 
     const resultToStore: StoredTestResult = {
-        date: Date.now(),
+        date: new Date().toString(),
         deviceId,
+        sampledValues: sampleValues(values),
         values,
     };
 
@@ -87,4 +97,34 @@ export function getTestsInfo(): ClientTestInfo[] {
         res.push({id, name, description, url});
     }
     return res;
+}
+
+function sampleValues(values: Sample[]): SampledValues[] {
+    const groups: {[key: string]: {name: string, mean: number[], deviation: number[]}} = {};
+
+    values.forEach((sample) => {
+        const name = sample.name;
+
+        if (!groups[name]) {
+            groups[name] = {
+                name,
+                mean: [],
+                deviation: [],
+            };
+        }
+
+        groups[name].mean.push(getMean(sample.values));
+        groups[name].deviation.push(getDeviation(sample.values));
+    });
+
+    const result: SampledValues[] = [];
+    for (const key in groups) {
+        const group = groups[key];
+        result.push({
+            name: group.name,
+            mean: getMean(group.mean),
+            deviation: getDeviation(group.deviation),
+        });
+    }
+    return result;
 }

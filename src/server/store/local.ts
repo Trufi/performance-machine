@@ -26,3 +26,8 @@ export async function addTestResult(testId: number, result: StoredTestResult) {
 
     fs.writeJson(testResultsPath, testResults);
 }
+
+export async function deleteAllTestResults(testId: number) {
+    const testResultsPath = path.join(testResultsDirPath, String(testId) + '.json');
+    fs.remove(testResultsPath);
+}
