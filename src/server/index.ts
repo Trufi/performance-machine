@@ -278,6 +278,19 @@ app.delete('/api/test/:testId', (req, res) => {
     sendDataToViewers();
 });
 
+app.get('/api/test/:testId', async (req, res) => {
+    log(`get /api/test, id: ${req.params.testId}`);
+
+    const testId = Number(req.params.testId);
+    if (isNaN(testId)) {
+        return res.status(400).send('TestId not a number');
+    }
+
+    const allTestResults = await store.getAllTestData(testId);
+
+    res.json(allTestResults);
+});
+
 // error handlers
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     log(error.stack);

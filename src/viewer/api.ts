@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CreateNewTestRequest, CreateNewTestResponse } from '../types/api';
+import { CreateNewTestRequest, CreateNewTestResponse, GetAllTestDataResponse } from '../types/api';
 
 const instance = axios.create({
     baseURL: location.origin + '/api',
@@ -16,4 +16,8 @@ export async function startTest(testId: number, deviceId: number) {
 
 export async function deleteTest(testId: number) {
     return instance.delete(`test/${testId}`);
+}
+
+export async function getAllTestData(testId: number) {
+    return instance.get<GetAllTestDataResponse>(`test/${testId}`);
 }

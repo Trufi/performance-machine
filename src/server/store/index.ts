@@ -101,6 +101,17 @@ export function getTestsInfo(): ClientTestInfo[] {
     return res;
 }
 
+export async function getAllTestData(testId: number): Promise<{
+    results: StoredTestResult[];
+    data: StoredTestData;
+}> {
+    const results = await local.getAllTestResults(testId);
+    return {
+        results,
+        data: testList[testId],
+    };
+}
+
 function sampleValues(values: Sample[]): SampledValues[] {
     const groups: {[key: string]: {name: string, mean: number[], deviation: number[]}} = {};
 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { AggregatorData, FromViewerMessage } from '../../types/messages';
 import { DeviceList } from './deviceList';
 import { TestList } from './testList';
@@ -9,12 +10,12 @@ interface CommonProps {
     aggregatorData?: AggregatorData;
 }
 
-export class Common extends React.Component<CommonProps, {}> {
+export class Common extends React.Component<CommonProps & RouteComponentProps<any>, {}> {
     private selectDeviceElement: HTMLSelectElement;
     private selectTestElement: HTMLSelectElement;
 
     public render() {
-        const {aggregatorData} = this.props;
+        const {aggregatorData, history} = this.props;
 
         let devicesHtml = <div>No devices</div>;
         if (aggregatorData && aggregatorData.devices.length) {
@@ -27,7 +28,7 @@ export class Common extends React.Component<CommonProps, {}> {
 
         let testsHtml = <div>No tests</div>;
         if (aggregatorData && aggregatorData.testsInfo.length) {
-            testsHtml = <TestList data={aggregatorData.testsInfo} deleteCallback={this.deleteTest}/>;
+            testsHtml = <TestList data={aggregatorData.testsInfo} history={history}/>;
         }
 
         let startTestHtml;
@@ -70,17 +71,6 @@ export class Common extends React.Component<CommonProps, {}> {
             );
         } catch (err) {
             console.log(err, err.response);
-        }
-    }
-
-    private deleteTest = (testId: number) => {
-        const result = confirm(`Do you want to delete test with id: ${testId}?`);
-        if (result) {
-            try {
-                api.deleteTest(testId);
-            } catch (err) {
-                console.log(err, err.response);
-            }
         }
     }
 }

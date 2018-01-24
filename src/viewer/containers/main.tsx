@@ -7,6 +7,7 @@ import {
 import { Common } from './common';
 import { NewTest } from './newTest';
 import { FromViewerMessage, AggregatorData } from '../../types/messages';
+import { TestResults } from './testResults';
 
 interface MainProps {
     sendMessage: (msg: FromViewerMessage) => void;
@@ -38,8 +39,9 @@ export class Main extends React.Component<MainProps, MainState> {
                     <Link to='/'>Home</Link>{' | '}
                     <Link to='/new-test'>Create new test</Link>
                 </nav>
-                <Route exact path='/' render={() => <Common {...componentProps}/>}/>
+                <Route exact path='/' render={(props) => <Common {...componentProps} {...props}/>}/>
                 <Route path='/new-test' render={(props) => <NewTest {...componentProps} {...props}/>}/>
+                <Route path='/test/:testId' render={(props) => <TestResults {...props}/>}/>
             </div>
         </Router>;
     }
